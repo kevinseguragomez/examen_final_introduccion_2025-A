@@ -1,0 +1,77 @@
+<h1>Solucines Kevín Darwin Segura Gómez</h1>
+<h2>kevinseguragomez</h2>
+<a href="https://github.com/kevinseguragomez">https://github.com/kevinseguragomez</a>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario con IndexedDB</title>
+  <script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    label, input, select, button { display: block; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Formulario de Datos Personales</h1>
+  <form id="datosForm">
+    <label for="nombre">Nombres:</label>
+    <input type="text" id="nombre" required>
+
+    <label for="apellido">Apellidos:</label>
+    <input type="text" id="apellido" required>
+
+    <label for="anio">Año de nacimiento:</label>
+    <input type="number" id="anio" required>
+
+    <label for="mes">Mes de nacimiento (1-12):</label>
+    <input type="number" id="mes" min="1" max="12" required>
+
+    <button type="submit">Guardar</button>
+  </form>
+
+  <script>
+    // Inicialización de la base de datos con Dexie
+    const db = new Dexie("FormularioDB");
+    db.version(1).stores({
+      personas: "++id, nombre, apellido, anio, mes, bisiesto, mesPar"
+    });
+
+    // Función para determinar si un año es bisiesto
+    function esBisiesto(anio) {
+      return (anio % 4 === 0 && anio % 100 !== 0) || (anio % 400 === 0);
+    }
+
+    // Función para determinar si un mes es par
+    function mesEsPar(mes) {
+      return mes % 2 === 0;
+    }
+
+    // Manejo del evento submit
+    document.getElementById("datosForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const nombre = document.getElementById("nombre").value;
+      const apellido = document.getElementById("apellido").value;
+      const anio = parseInt(document.getElementById("anio").value);
+      const mes = parseInt(document.getElementById("mes").value);
+
+      const bisiesto = esBisiesto(anio);
+      const mesPar = mesEsPar(mes);
+
+      await db.personas.add({
+        nombre,
+        apellido,
+        anio,
+        mes,
+        bisiesto,
+        mesPar
+      });
+
+      alert("Datos guardados correctamente. Año bisiesto: " + bisiesto + ", Mes par: " + mesPar);
+      document.getElementById("datosForm").reset();
+    });
+  </script>
+</body>
+</html>
